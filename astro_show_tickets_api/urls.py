@@ -1,4 +1,4 @@
-git init"""
+"""
 URL configuration for astro_show_tickets_api project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
