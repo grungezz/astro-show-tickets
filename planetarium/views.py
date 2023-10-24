@@ -1,19 +1,19 @@
 from datetime import datetime
-
 from django.db.models import F, Count
-from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import viewsets, mixins, status
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
-from rest_framework.viewsets import GenericViewSet
-
-from planetarium.models import ShowTheme, PlanetariumDome, AstronomyShow, ShowSession, Reservation
+from planetarium.models import (
+    ShowTheme,
+    PlanetariumDome,
+    AstronomyShow,
+    ShowSession,
+    Reservation,
+)
 from planetarium.permissions import IsAdminOrIfAuthenticatedReadOnly
-
-from planetarium.serializers import (
+from .serializers import (
     ShowThemeSerializer,
     PlanetariumDomeSerializer,
     AstronomyShowSerializer,
@@ -27,11 +27,10 @@ from planetarium.serializers import (
     AstronomyShowImageSerializer,
 )
 
-
 class ShowThemeViewSet(
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
-    GenericViewSet,
+    viewsets.GenericViewSet,
 ):
     queryset = ShowTheme.objects.all()
     serializer_class = ShowThemeSerializer
@@ -41,7 +40,7 @@ class ShowThemeViewSet(
 class PlanetariumDomeViewSet(
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
-    GenericViewSet,
+    viewsets.GenericViewSet,
 ):
     queryset = PlanetariumDome.objects.all()
     serializer_class = PlanetariumDomeSerializer
@@ -86,9 +85,6 @@ class AstronomyShowViewSet(
         if self.action == "retrieve":
             return AstronomyShowDetailSerializer
 
-        if self.action == "upload_image":
-            return AstronomyShowImageSerializer
-
         return AstronomyShowSerializer
 
     @action(
@@ -107,25 +103,6 @@ class AstronomyShowViewSet(
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    @extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "title",
-                type=str,
-                description="Search by title",
-                required=False,
-            ),
-            OpenApiParameter(
-                "show_themes",
-                type={"type": "list", "items": {"type": "number"}},
-                description="Search by show_themes ids",
-            ),
-        ]
-    )
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
-
 
 class ShowSessionViewSet(viewsets.ModelViewSet):
     queryset = (
@@ -165,35 +142,14 @@ class ShowSessionViewSet(viewsets.ModelViewSet):
 
         return ShowSessionSerializer
 
-    @extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "astronomy_show_id",
-                type=int,
-                description="Search by AstronomyShow ID",
-                required=False,
-            ),
-            OpenApiParameter(
-                name="date",
-                type=OpenApiTypes.DATE,
-                location=OpenApiParameter.QUERY,
-                description='Filter by show time date "%Y-%m-%d"',
-            ),
-        ]
-    )
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
-
-
 class ReservationPagination(PageNumberPagination):
     page_size = 10
     max_page_size = 100
 
-
 class ReservationViewSet(
     mixins.ListModelMixin,
     mixins.CreateModelMixin,
-    GenericViewSet,
+    viewsets.GenericViewSet,
 ):
     queryset = Reservation.objects.prefetch_related(
         "tickets__show_session__astronomy_show", "tickets__show_session__planetarium_dome"

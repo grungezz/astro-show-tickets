@@ -1,4 +1,6 @@
 from django.urls import path
+
+
 from user.views import CreateUserView, ManageUserView
 
 app_name = "user"
