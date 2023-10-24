@@ -30,8 +30,6 @@ The Planetarium Management API is a robust solution for handling planetarium dat
 
 **Swagger Documentation**
 
-# Database Structure
-![Database Structure](demo/planetarium_db.png)
 
 ## Installation using GitHub
 
