@@ -27,6 +27,7 @@ from .serializers import (
     AstronomyShowImageSerializer,
 )
 
+
 class ShowThemeViewSet(
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
@@ -104,14 +105,16 @@ class AstronomyShowViewSet(
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class ShowSessionViewSet(viewsets.ModelViewSet):
     queryset = (
         ShowSession.objects.all()
         .select_related("astronomy_show", "planetarium_dome")
         .annotate(
             tickets_available=(
-                    F("planetarium_dome__rows") * F("planetarium_dome__seats_in_row")
-                    - Count("tickets")
+                F("planetarium_dome__rows")
+                * F("planetarium_dome__seats_in_row")
+                - Count("tickets")
             )
         )
     )
@@ -129,7 +132,9 @@ class ShowSessionViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(show_time__date=date)
 
         if astronomy_show_id_str:
-            queryset = queryset.filter(astronomy_show_id=int(astronomy_show_id_str))
+            queryset = queryset.filter(
+                astronomy_show_id=int(astronomy_show_id_str)
+            )
 
         return queryset
 
@@ -142,9 +147,11 @@ class ShowSessionViewSet(viewsets.ModelViewSet):
 
         return ShowSessionSerializer
 
+
 class ReservationPagination(PageNumberPagination):
     page_size = 10
     max_page_size = 100
+
 
 class ReservationViewSet(
     mixins.ListModelMixin,
@@ -152,7 +159,8 @@ class ReservationViewSet(
     viewsets.GenericViewSet,
 ):
     queryset = Reservation.objects.prefetch_related(
-        "tickets__show_session__astronomy_show", "tickets__show_session__planetarium_dome"
+        "tickets__show_session__astronomy_show",
+        "tickets__show_session__planetarium_dome",
     )
     serializer_class = ReservationSerializer
     pagination_class = ReservationPagination
